@@ -494,7 +494,7 @@ module MidiSmtpServer
           # 220 Ready to start TLS
           # 501 Syntax error (no parameters allowed)
           # 454 TLS not available due to temporary reason
-          raise 454 if @@tls.nil?
+          raise Smtpd454Exception if @@tls.nil?
           @@tls.start_tls
         else
           # If we somehow get to this point then
