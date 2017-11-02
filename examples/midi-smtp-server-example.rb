@@ -1,12 +1,11 @@
-require "midi-smtp-server"
-require "mail"
+require 'midi-smtp-server'
+require 'mail'
 
 # Server class
 class MySmtpd < MidiSmtpServer::Smtpd
-
   def start
     # initialize and do your own initailizations
-    
+
     # call inherited class method
     super
   end
@@ -22,7 +21,6 @@ class MySmtpd < MidiSmtpServer::Smtpd
     # handle incoming mail, just show the message source
     logger.debug(@mail.to_s)
   end
-
 end
 
 # Output for debug
@@ -40,7 +38,7 @@ server.join
 
 # setup exit code
 BEGIN {
-  at_exit {
+  at_exit do
     # check to shutdown connection
     if server
       # Output for debug
@@ -48,11 +46,11 @@ BEGIN {
       # gracefully connections down
       server.shutdown
       # check once if some connection(s) need(s) more time
-      sleep 2 unless server.connections == 0 
+      sleep 2 unless server.connections == 0
       # stop all threads and connections
       server.stop
     end
     # Output for debug
     puts "#{Time.now}: MySmtpd down!"
-  }
+  end
 }
