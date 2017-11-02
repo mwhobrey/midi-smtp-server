@@ -14,4 +14,5 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/mwhobrey/midi-smtp-server/'
   s.license     = 'MIT'
   s.add_runtime_dependency 'ruby-tls'
+  s.add_development_dependency 'ruby-tls'
 end
