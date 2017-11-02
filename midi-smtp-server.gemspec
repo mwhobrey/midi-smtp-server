@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
     'README.md',
     'MIT-LICENSE.txt',
     'lib/midi-smtp-server.rb',
-    'lib/midi-smpt-tls.rb'
+    'lib/midi-smtp-tls.rb'
   ]
   s.homepage    = 'https://github.com/mwhobrey/midi-smtp-server/'
   s.license     = 'MIT'
