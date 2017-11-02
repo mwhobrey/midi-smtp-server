@@ -1,7 +1,7 @@
 require 'socket'
 require 'thread'
 require 'base64'
-require 'midi-smtp-tls'
+require_relative './midi-smtp-tls'
 
 module MidiSmtpServer
   # default values
