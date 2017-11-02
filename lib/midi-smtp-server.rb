@@ -1,6 +1,7 @@
 require 'socket'
 require 'thread'
 require 'base64'
+require_relative 'midi-smtp-tls'
 
 module MidiSmtpServer
   # default values
@@ -18,6 +19,7 @@ module MidiSmtpServer
     # connection management
     @@services = {} # Hash of opened ports, i.e. services
     @@servicesMutex = Mutex.new
+    @@tls = nil
 
     # Stop the server running on the given port, bound to the given host
     def self.stop(port = DEFAULT_SMTPD_PORT, host = DEFAULT_SMTPD_HOST)
@@ -84,6 +86,11 @@ module MidiSmtpServer
     # logging object, may be overrriden by special loggers like YELL or others
     attr_reader :logger
 
+    # tls cert file path
+    attr_accessor :tls_cert
+    # tls key file path
+    attr_accessor :tls_key
+
     # Initialize SMTP Server class
     #
     # +port+:: port to listen on
@@ -93,6 +100,8 @@ module MidiSmtpServer
     # +opts.do_dns_reverse_lookup+:: flag if this smtp server should do reverse lookups on incoming connections
     # +opts.auth_mode+:: enable builtin authentication support (:AUTH_FORBIDDEN, :AUTH_OPTIONAL, :AUTH_REQUIRED)
     # +opts.logger+:: own logger class, otherwise default logger is created
+    # +opts.cert+:: tls certificate chain path
+    # +opts.key+:: tls key path
     def initialize(port = DEFAULT_SMTPD_PORT, host = DEFAULT_SMTPD_HOST, max_connections = DEFAULT_SMTPD_MAX_CONNECTIONS, opts = {})
       # logging
       if opts.include?(:logger)
@@ -111,6 +120,16 @@ module MidiSmtpServer
       @connections = []
       @connectionsMutex = Mutex.new
       @connectionsCV = ConditionVariable.new
+
+      # check for valid cert/key paths and set vars
+      @tls_cert = opts[:cert] if opts.include?(:cert) && File.exist?(opts[:cert])
+      @tls_key = opts[:key] if opts.include?(:key) && File.exist?(opts[:key])
+
+      unless @tls_cert.nil? || @tls_cert.empty? ||
+             @tls_key.nil? || @tls_key.empty?
+        @@tls = MidiSmtpTls.new(@tls_cert, @tls_key)
+      end
+
       # next should prevent (if wished) to auto resolve hostnames and create a delay on connection
       BasicSocket.do_not_reverse_lookup = true
       # save flag if this smtp server should do reverse lookups
@@ -475,7 +494,8 @@ module MidiSmtpServer
           # 220 Ready to start TLS
           # 501 Syntax error (no parameters allowed)
           # 454 TLS not available due to temporary reason
-          '220 Go ahead'
+          raise 454 if @@tls.nil?
+          @@tls.start_tls
         else
           # If we somehow get to this point then
           # we have encountered an error
