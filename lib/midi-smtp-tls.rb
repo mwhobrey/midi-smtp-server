@@ -49,7 +49,8 @@ class MidiSmtpTls
   end
 
   def decrypt(data)
-    @ssl_layer.decrypt(data)
+    ret = @ssl_layer.decrypt(data)
     dispatch_cb(data)
+    ret
   end
 end
