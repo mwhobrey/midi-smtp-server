@@ -50,10 +50,11 @@ class MidiSmtpTls
   end
 
   def decrypt(data)
+    ret = nil
     while ret.nil? do
       ret = @ssl_layer.decrypt(data)
     end
-    
+
     dispatch_cb(data)
     ret
   end
