@@ -235,12 +235,9 @@ module MidiSmtpServer
                 # log smtp dialog // message data is stored separate
                 logger.debug(">>> #{output}")
                 # smtp dialog response
-
-                if @use_tls
-                  @tls.send("#{output}\r\n")
-                else
-                  io.print("#{output}\r\n")
-                end
+                
+                @tls.send("#{output}\r\n") if @use_tls
+                io.print("#{output}\r\n")
               end
 
             end
