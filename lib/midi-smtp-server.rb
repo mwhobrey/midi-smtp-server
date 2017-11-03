@@ -207,7 +207,7 @@ module MidiSmtpServer
             if IO.select([io], nil, nil, 0.1)
 
               # read and handle input
-              data = io.readline
+              data = @use_tls ? @tls.decrypt(io.readline) : io.readline
               # log data, verbosity based on log severity and data type
               logger.debug('<<< ' + data) if Thread.current[:cmd_sequence] != :CMD_DATA
 
