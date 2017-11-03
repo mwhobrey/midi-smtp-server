@@ -36,7 +36,8 @@ class MidiSmtpTls
 
   def verify_cb(cert)
     # Return true or false
-    is_cert_valid? cert
+    # is_cert_valid? cert
+    true
   end
 
   def start_tls
