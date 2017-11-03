@@ -19,7 +19,7 @@ module MidiSmtpServer
     # connection management
     @@services = {} # Hash of opened ports, i.e. services
     @@servicesMutex = Mutex.new
-    @@tls = nil
+    @tls = nil
 
     # Stop the server running on the given port, bound to the given host
     def self.stop(port = DEFAULT_SMTPD_PORT, host = DEFAULT_SMTPD_HOST)
@@ -127,7 +127,7 @@ module MidiSmtpServer
 
       unless @tls_cert.nil? || @tls_cert.empty? ||
              @tls_key.nil? || @tls_key.empty?
-        @@tls = MidiSmtpTls.new(@tls_cert, @tls_key)
+        @tls = MidiSmtpTls.new(@tls_cert, @tls_key)
       end
 
       # next should prevent (if wished) to auto resolve hostnames and create a delay on connection
@@ -235,7 +235,12 @@ module MidiSmtpServer
                 # log smtp dialog // message data is stored separate
                 logger.debug(">>> #{output}")
                 # smtp dialog response
-                io.print("#{output}\r\n")
+
+                if @use_tls
+                  @tls.send("#{output}\r\n")
+                else
+                  io.print("#{output}\r\n")
+                end
               end
 
             end
@@ -494,8 +499,10 @@ module MidiSmtpServer
           # 220 Ready to start TLS
           # 501 Syntax error (no parameters allowed)
           # 454 TLS not available due to temporary reason
-          raise Smtpd454Exception if @@tls.nil?
-          @@tls.start_tls
+          raise Smtpd454Exception if @tls.nil?
+          @tls.start_tls
+          @use_tls = true
+          '220 Ready to start TLS'
         else
           # If we somehow get to this point then
           # we have encountered an error
