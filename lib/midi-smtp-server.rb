@@ -236,7 +236,7 @@ module MidiSmtpServer
                 logger.debug(">>> #{output}")
                 # smtp dialog response
                 
-                @tls.send("#{output}\r\n") if @use_tls
+                output = @tls.send("#{output}\r\n") if @use_tls
                 io.print("#{output}\r\n")
               end
 
