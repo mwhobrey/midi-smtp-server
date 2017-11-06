@@ -207,13 +207,13 @@ module MidiSmtpServer
             if IO.select([io], nil, nil, 0.1)
 
               # read and handle input
-              data = @use_tls ? @tls.decrypt(io.readline) : io.readline
+              dat = @use_tls ? @tls.decrypt(io.readline) : io.readline
               # log data, verbosity based on log severity and data type
-              logger.debug('<<< ' + data) if Thread.current[:cmd_sequence] != :CMD_DATA
+              logger.debug('<<< ' + dat) if Thread.current[:cmd_sequence] != :CMD_DATA
 
               # process commands and handle special SmtpdExceptions
               begin
-                output = process_line(data)
+                output = process_line(dat)
 
               # defined SmtpdException
               rescue SmtpdException => e
